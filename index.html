@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        @font-face {
+            font-family: fredoka;
+            src: url(Fredoka.ttf);
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0; /* Add a background color for better visibility */
+        }
+
+        .calc {
+            border-radius: 20px;
+            border: none;
+            padding: 1%;
+            background-color: lightgray;
+            width: 80%;
+            max-width: 400px;
+            height: 50%;
+        }
+        .main {
+            background-color: rgb(250, 250, 250);
+            border: none;
+            border-radius: 10px;
+            width: 100%;
+            font-family: fredoka;
+            font-size: 6vh;
+            font-weight: 500;
+            color: rgb(15, 15, 15);
+            height: 100%;
+        }
+
+        .buttons {
+            text-align: center;
+        }
+
+        .buttons > * {
+            padding: 0px;
+            margin: 1%;
+            background-color: rgb(245, 245, 245);
+            border: none;
+            border-radius: 10px;
+            width: 30%;
+            height: 16%;
+            font-family: fredoka;
+            font-size: 4vh;
+            font-weight: 600;
+        }
+
+        .action {
+            background-color: rgb(240, 240, 245);
+            width: 16.5%;
+            margin-bottom: 5%;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        function play_sound() {
+            var aud = new Audio("press.mp3")
+            aud.play()
+        }
+
+        function split_multiple(str, separators) {
+            var replacedStr = str
+
+            for (const separator of separators) {
+                replacedStr = replacedStr.replaceAll(separator, '$')
+            }
+
+
+            var splitStr = replacedStr.split('$')
+
+            var newStr = []
+
+            for (var i = 0; i < splitStr.length; i += 1) {
+                if (splitStr[i] != "") {
+                    newStr.push(splitStr[i])
+                }
+            }
+
+            console.log(newStr)
+
+            return newStr
+        }
+
+        function digit(d) {
+            if(result.value.length < 12) {
+                if(d == "0") {
+                    if(!isNaN(parseInt(result.value.slice(-1)))) {
+                        if(result.value.length > 0 && result.value.slice(-1) > 0) {
+                            result.value += d
+                            play_sound()
+                        } else if(result.value.length > 1) {
+                            result.value += d
+                            play_sound()
+                        }
+                    }
+                } else {
+                    if (result.value == "0") {
+                        result.value = d
+                        play_sound()
+                    } else {
+                        result.value += d
+                        play_sound()
+                    }
+                }
+            }
+        }
+
+        function action(a) {
+            if(result.value.length < 12 && result.value.length > 0 && !isNaN(parseInt(result.value.slice(-1)))) {
+                result.value += a
+                play_sound()
+            }
+        }
+
+        function clear_input() {
+            result.value = "0"
+            play_sound()
+        }
+
+        function delete_digit() {
+            var init = result.value
+            result.value = result.value.slice(0,result.value.length-1)
+            if(result.value == "") {
+                result.value = "0"
+            }
+            if(init != result.value) {
+                play_sound()
+            }
+        }
+
+        function calculate() {
+            if (result.value.slice(-1) > 0) {
+                var expression = result.value
+                var operators = split_multiple(expression,["0","1","2","3","4","5","6","7","8","9"])
+                var parts = split_multiple(expression,["+","-","*","/"])
+                var res = parseFloat(parts[0])
+
+                var opindex = 1
+                for (var i = 1; i < parts.length; i += 1) {
+                    var operator = operators[i-1]
+                    var operand = parseFloat(parts[i])
+                    switch (operator) {
+                        case '+':
+                        res += operand;
+                        break;
+                        case '-':
+                        res -= operand;
+                        break;
+                        case '*':
+                        res *= operand;
+                        break;
+                        case '/':
+                        if (operand !== 0) {
+                            res /= operand;
+                        }
+                        break;
+                    }
+                    opindex += 1
+                }
+
+                if(res != expression) {
+                    var aud = new Audio("calculated.mp3")
+                    aud.play()
+                }
+
+                result.value = res
+
+                if(result.value.length > 12) {
+                    result.value = "Number too large!"
+                }
+            }
+        }
+    </script>
+
+    <div class="calc">
+        <div style="height: 15%;">
+            <input  class="main" id="result" value="0" type="text" disabled>
+        </div>
+        <br>
+        <div class="buttons" style="height: 85%;">
+            <input id="aa" class="action" onclick="action(this.value)" value="+" type="button">
+            <input id="as" class="action" onclick="action(this.value)" value="-" type="button">
+            <input id="am" class="action" onclick="action(this.value)" value="*" type="button">
+            <input id="ad" class="action" onclick="action(this.value)" value="/" type="button">
+            <input id="ae" class="action" onclick="calculate()" value="=" type="button">
+            <br>
+            <input id="d1" onclick="digit(this.value)" value="1" type="button">
+            <input id="d2" onclick="digit(this.value)" value="2" type="button">
+            <input id="d3" onclick="digit(this.value)" value="3" type="button">
+            <br>
+            <input id="d4" onclick="digit(this.value)" value="4" type="button">
+            <input id="d5" onclick="digit(this.value)" value="5" type="button">
+            <input id="d6" onclick="digit(this.value)" value="6" type="button">
+            <br>
+            <input id="d7" onclick="digit(this.value)" value="7" type="button">
+            <input id="d8" onclick="digit(this.value)" value="8" type="button">
+            <input id="d9" onclick="digit(this.value)" value="9" type="button">
+            <br>
+            <input id="cl" onclick="clear_input()" value="C" type="button">
+            <input id="d0" onclick="digit(this.value)" value="0" type="button">
+            <input id="dl" onclick="delete_digit()" value="DEL" type="button">
+        </div>
+        <br>
+    </div>
+</body>
+</html>
